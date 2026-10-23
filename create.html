@@ -39,6 +39,7 @@
 <h2>Ta boutique est en ligne</h2>
 <p class="info">Partage ce lien à tes clients :</p>
 <div class="link" id="shopLink"></div>
+<div class="note" id="aboBox"></div>
 <a class="order" id="shareWa" target="_blank" rel="noopener" href="#">Partager sur WhatsApp</a>
 <button class="add" id="copy" type="button">Copier le lien</button>
 <a class="add" id="seeShop" href="#">Voir ma boutique</a>
@@ -50,6 +51,7 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var MAX = 20;
+  var ABO = { prix: "3 000 F", essai: 10, payLink: "https://pay.wave.com/m/M_ci_HSbImDT_M_Ro/c/ci/", mtn: "0584151920", whatsapp: "2250584151920" };
   if (DEMO) $("demoNote").hidden = false;
 
   var nameEl = $("name"), slugEl = $("slug"), slugTouched = false;
@@ -121,6 +123,17 @@
       var url = new URL("shop.html?b=" + shop.slug, location.href).href;
       $("formBox").hidden = true; $("done").hidden = false;
       $("shopLink").textContent = url;
+      var end = new Date(Date.now() + ABO.essai * 864e5).toLocaleDateString("fr-FR");
+      var proof = "https://wa.me/" + ABO.whatsapp + "?text=" + encodeURIComponent("Bonjour, voici ma preuve de paiement pour ma boutique " + name + " : " + url);
+      var h = "<b>" + ABO.essai + " jours gratuits</b>, jusqu’au " + esc(end) + ". Pour garder ta boutique après, l’abonnement est de " + ABO.prix + " par mois.";
+      h += '<div style="display:grid;gap:8px;margin:12px 0">';
+      if (ABO.payLink) h += '<a class="order" href="' + esc(ABO.payLink) + '" target="_blank" rel="noopener">Payer avec Wave</a>';
+      if (ABO.mtn) h += '<button class="add" type="button" id="mtnCopy">MTN Money : ' + esc(ABO.mtn) + ' (copier)</button>';
+      h += '</div>Après paiement, <a style="color:inherit;font-weight:600" href="' + proof + '" target="_blank" rel="noopener">envoie la preuve sur WhatsApp</a>.';
+      $("aboBox").innerHTML = h;
+      if ($("mtnCopy")) $("mtnCopy").onclick = function () {
+        (navigator.clipboard ? navigator.clipboard.writeText(ABO.mtn.replace(/\D/g, "")) : Promise.reject()).then(function () { $("mtnCopy").textContent = "Numéro copié"; }, function () { $("mtnCopy").textContent = "Copie le numéro : " + ABO.mtn; });
+      };
       $("seeShop").href = url;
       $("shareWa").href = "https://wa.me/?text=" + encodeURIComponent("Découvre ma boutique " + name + " : " + url);
       $("copy").onclick = function () {
