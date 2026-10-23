@@ -32,7 +32,9 @@
       '<aside class="cart"><h3>Ma commande</h3><div id="lines"></div>' +
       '<div class="total"><span>Total</span><span id="total">0 F</span></div>' +
       '<div class="f"><label for="who">Ton nom et ton quartier</label><input class="tx" id="who" maxlength="80"></div>' +
-      '<a class="order" id="order" aria-disabled="true" href="#" target="_blank" rel="noopener">Commander sur WhatsApp</a></aside></div>' +
+      '<a class="order" id="order" aria-disabled="true" href="#" target="_blank" rel="noopener">Commander sur WhatsApp</a>' +
+      (/^https:\/\//i.test(s.wave || "") ? '<a class="add" style="margin-top:10px" href="' + esc(s.wave) + '" target="_blank" rel="noopener">Payer avec Wave</a><p class="info">Après le paiement, envoie la capture sur WhatsApp.</p>' : '') +
+      '</aside></div>' +
       '<p class="info" style="margin-top:28px">Boutique créée avec <a href="index.html">Brobroli</a></p>';
 
     var box = document.getElementById("items");
