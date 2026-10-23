@@ -17,8 +17,8 @@
 
 <div id="formBox">
 <div class="f"><label for="name">Nom de ta boutique</label><input class="tx" id="name" maxlength="40" autocomplete="off" placeholder="Ex : Chez Aminata"></div>
-<div class="f"><label for="slug">Ton lien</label><input class="tx" id="slug" maxlength="30" autocapitalize="none" spellcheck="false" autocomplete="off"><small id="slugHint">Lettres minuscules, chiffres et tirets.</small></div>
-<div class="f"><label for="wa">Ton numéro WhatsApp</label><input class="tx" id="wa" type="tel" inputmode="tel" placeholder="2250584151920"><small>Avec l’indicatif du pays, sans + ni espaces.</small></div>
+<div class="f"><label for="slug">Ton lien (créé automatiquement)</label><input class="tx" id="slug" maxlength="30" autocapitalize="none" spellcheck="false" autocomplete="off"><small id="slugHint">Tu peux le modifier. S’il est déjà pris, un numéro est ajouté tout seul.</small></div>
+<div class="f"><label for="wa">Ton numéro WhatsApp</label><input class="tx" id="wa" type="tel" inputmode="tel" placeholder="2250584151920"><small>Ex : 0584151920 ou 2250584151920 (l’indicatif 225 est ajouté automatiquement).</small></div>
 <div class="f"><span class="lb">Moyens de paiement</span>
 <div class="pays" id="pays">
 <label><input type="checkbox" value="Wave"> Wave</label>
@@ -86,10 +86,21 @@
 
   function fail(t) { $("err").textContent = t; }
 
+  function tryPublish(shop, base, n) {
+    return saveShop(shop).catch(function (e) {
+      if (e.message === "taken" && n < 5) {
+        shop.slug = base + "-" + (Math.floor(Math.random() * 900) + 100);
+        return tryPublish(shop, base, n + 1);
+      }
+      throw e;
+    });
+  }
+
   $("publish").onclick = function () {
     $("err").textContent = "";
     var name = nameEl.value.trim(), slug = slugify(slugEl.value);
     var wa = $("wa").value.replace(/\D/g, "").replace(/^00/, "");
+    if (/^0\d{9}$/.test(wa)) wa = "225" + wa;
     if (!name) return fail("Écris le nom de ta boutique.");
     if (slug.length < 3) return fail("Ton lien doit faire au moins 3 caractères.");
     if (wa.length < 9 || wa.length > 15) return fail("Vérifie ton numéro WhatsApp, avec l’indicatif du pays.");
@@ -106,8 +117,8 @@
     if (wave) shop.wave = wave;
     var btn = $("publish");
     btn.disabled = true; btn.textContent = "Publication…";
-    saveShop(shop).then(function () {
-      var url = new URL("shop.html?b=" + slug, location.href).href;
+    tryPublish(shop, slug, 0).then(function () {
+      var url = new URL("shop.html?b=" + shop.slug, location.href).href;
       $("formBox").hidden = true; $("done").hidden = false;
       $("shopLink").textContent = url;
       $("seeShop").href = url;
