@@ -1,9 +1,9 @@
 var WA_NUMBER="2250584151920";
 var items=[
-{id:1,n:"Robe wax",p:15000,e:"👗",c:"#f6d98a"},
+{id:1,n:"Robe",p:15000,e:"👗",c:"#f6d98a"},
 {id:2,n:"Sac en cuir",p:22000,e:"👜",c:"#f1c4a3"},
-{id:3,n:"Jus de bissap",p:1500,e:"🥤",c:"#e9a9b3"},
-{id:4,n:"Savon karité",p:2500,e:"🧼",c:"#cfe3c0"}
+{id:3,n:"Jus",p:1500,e:"🥤",c:"#e9a9b3"},
+{id:4,n:"Savon",p:2500,e:"🧼",c:"#cfe3c0"}
 ];
 var cart={};
 function fmt(n){return n.toLocaleString("fr-FR").replace(/\u202f/g," ")+" F"}
