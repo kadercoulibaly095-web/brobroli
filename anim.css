@@ -1,1 +1,38 @@
+@media (prefers-reduced-motion: no-preference) {
+  h1 { animation: rise .8s ease both; }
+  .sub { animation: rise .8s .15s ease both; }
+  .wrap > .lead { animation: rise .8s .3s ease both; }
+  mark {
+    background-color: transparent;
+    background-image: linear-gradient(var(--sun), var(--sun));
+    background-repeat: no-repeat;
+    background-size: 0 100%;
+    animation: hl .9s .7s ease forwards;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  @keyframes hl { to { background-size: 100% 100%; } }
+
+  .rv { opacity: 0; transform: translateY(26px); transition: opacity .6s ease, transform .35s ease; transition-delay: var(--d, 0s); }
+  .rv.in { opacity: 1; transform: none; }
+  .why .rv.in:hover, .steps .rv.in:hover, .tarif.rv.in:hover { transform: translateY(-5px); }
+  .steps .rv.in b { animation: pop .5s .2s both; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.15); } to { transform: scale(1); opacity: 1; } }
+
+  .item { animation: float 5s ease-in-out infinite; }
+  .item:nth-child(2) { animation-delay: -1.3s; }
+  .item:nth-child(3) { animation-delay: -2.6s; }
+  .item:nth-child(4) { animation-delay: -3.9s; }
+  @keyframes float { 50% { translate: 0 -6px; } }
+  .row { animation: rise .3s ease both; }
+
+  .go, .final a, .pill, .order { transition: transform .2s ease, box-shadow .2s ease; }
+  .go:hover, .final a:hover, .order:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 61, 42, .25); }
+  .go:active, .final a:active, .order:active { transform: scale(.97); }
+  .final a { animation: pulse 2.4s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(249, 181, 20, .55); }
+    70% { box-shadow: 0 0 0 14px rgba(249, 181, 20, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(249, 181, 20, 0); }
+  }
+}
 
