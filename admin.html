@@ -34,13 +34,12 @@
 
 <div id="panel" hidden>
 <div class="f"><input class="tx" id="q" placeholder="Rechercher une boutique…" aria-label="Rechercher une boutique"></div>
-
+<button class="add" id="refresh" type="button" style="margin-bottom:10px">Actualiser la liste</button>
+<p class="info" id="count"></p>
 <div id="list"></div>
 <button class="add" id="out" type="button">Se déconnecter</button>
 </div>
 </div>
-<button class="add" id="refresh" type="button" style="margin-bottom:10px">Actualiser la liste</button>
-<p class="info" id="count"></p>
 
 <script src="app.js"></script>
 <script>
@@ -71,9 +70,6 @@
   $("out").onclick = function () { token = ""; shops = []; $("panel").hidden = true; $("login").hidden = false; };
   $("q").addEventListener("input", draw);
   $("refresh").onclick = function () { $("count").textContent = "Chargement…"; load(); };
-
-
-
 
   function load() {
     fetch(rest("?select=slug,name,whatsapp,expires_at,created_at&order=created_at.desc&limit=500"), { headers: hd() })
@@ -130,4 +126,3 @@
 </script>
 </body>
 </html>
-
