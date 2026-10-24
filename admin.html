@@ -70,6 +70,10 @@
   };
   $("out").onclick = function () { token = ""; shops = []; $("panel").hidden = true; $("login").hidden = false; };
   $("q").addEventListener("input", draw);
+  $("refresh").onclick = function () { $("count").textContent = "Chargement…"; load(); };
+
+
+
 
   function load() {
     fetch(rest("?select=slug,name,whatsapp,expires_at,created_at&order=created_at.desc&limit=500"), { headers: hd() })
