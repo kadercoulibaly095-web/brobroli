@@ -16,10 +16,15 @@
 <script>
 (function () {
   var root = document.getElementById("root");
-  var slug = (new URLSearchParams(location.search).get("b") || "").toLowerCase();
+  var slug = (new URLSearchParams(location.search).get("b") || (location.pathname.split("/").pop() || "").replace(/\.html$/, "")).toLowerCase();
+  if (slug === "shop") slug = "";
   function msg(t) { root.innerHTML = '<p class="lead">' + esc(t) + '</p><p class="info"><a href="index.html">Créer ma boutique avec Brobroli</a></p>'; }
   if (!slug) return msg("Aucune boutique n’est indiquée dans ce lien.");
-  loadShop(slug).then(function (s) { s ? show(s) : msg("Cette boutique n’existe pas."); })
+  loadShop(slug).then(function (s) {
+    if (!s) return msg("Cette boutique n’existe pas.");
+    if (s.expires_at && new Date(s.expires_at) < new Date()) return msg("Cette boutique est temporairement indisponible. Reviens plus tard.");
+    show(s);
+  })
     .catch(function () { msg("Impossible de charger la boutique. Réessaie dans un instant."); });
 
   function show(s) {
