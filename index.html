@@ -4,8 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Brobroli – Ta boutique sur WhatsApp</title>
+<meta name="description" content="Crée ta boutique en 2 minutes, partage un seul lien et reçois les commandes directement sur ton WhatsApp. 5 jours gratuits, 0 commission.">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=Hanken+Grotesk:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+.why{display:grid;gap:12px;margin-top:20px}
+@media(min-width:760px){.why{grid-template-columns:repeat(2,1fr)}}
+.why div{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:18px}
+.why h3{font-size:21px;margin-bottom:6px}
+.why p{margin:0;color:var(--soft);font-size:16px}
+.tarif{background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:26px;margin-top:20px;max-width:520px}
+.tarif .big{font:800 clamp(40px,10vw,56px)/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em}
+.tarif .big small{font-size:18px;font-weight:500;color:var(--soft)}
+.tarif p{margin:8px 0 0}
+.tarif ul{margin:14px 0 0;padding-left:20px;color:var(--soft)}
+.faq details{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
+.faq summary{font-weight:600;cursor:pointer}
+.faq summary:focus-visible{outline:3px solid var(--sun);outline-offset:3px;border-radius:6px}
+.faq p{margin:8px 0 0;color:var(--soft);font-size:16px}
+footer a{color:inherit}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -13,13 +31,23 @@
 
 <h1>Ta boutique.<br>Ton WhatsApp.<br>Ton <mark>brobroli</mark>.</h1>
 <p class="sub">Arrête d’envoyer 50 photos.<br><em>Envoie ta boutique.</em></p>
-<p class="lead">Tes articles et tes prix sur une seule page. Tes clients choisissent, et la commande arrive directement sur ton WhatsApp.</p>
+<p class="lead">Un seul lien : tes articles, tes prix, et la commande directement sur ton WhatsApp.</p>
 
 <div class="claim">
 <label for="slug">brobroli.netlify.app/<input id="slug" value="ta-boutique" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
 <button class="go" id="go" type="button">Créer ma boutique</button>
 <p class="msg" id="msg" role="status"></p>
 </div>
+
+<section>
+<h2>Pourquoi choisir Brobroli</h2>
+<div class="why">
+<div><h3>Prête en 2 minutes</h3><p>Un nom, tes photos, tes prix. Pas besoin de savoir coder.</p></div>
+<div><h3>100 % de tes ventes</h3><p>Aucune commission, jamais. Un abonnement fixe, c’est tout.</p></div>
+<div><h3>Commande facile</h3><p>Tes clients choisissent, voient le total et envoient leur commande en un clic.</p></div>
+<div><h3>Tu restes sur WhatsApp</h3><p>Tu discutes, tu confirmes et tu encaisses comme d’habitude : Wave, MTN ou cash.</p></div>
+</div>
+</section>
 
 <section id="demo">
 <h2>Voilà ce que voient tes clients</h2>
@@ -34,18 +62,39 @@
 <section>
 <h2>Prête en trois étapes</h2>
 <ol class="steps">
-<li><b>1</b><h3>Ajoute tes articles</h3><p>Une photo, un nom, un prix. Pas besoin de savoir coder.</p></li>
-<li><b>2</b><h3>Partage ton lien</h3><p>Mets-le en statut, en bio ou envoie-le à tes clients.</p></li>
+<li><b>1</b><h3>Crée ta boutique</h3><p>Ajoute tes articles avec une photo, un nom et un prix.</p></li>
+<li><b>2</b><h3>Partage ton lien</h3><p>Mets-le en statut, sur Snap, Facebook ou en bio.</p></li>
 <li><b>3</b><h3>Reçois les commandes</h3><p>Chaque commande arrive sur WhatsApp, déjà détaillée avec le total.</p></li>
 </ol>
 </section>
 
+<section>
+<h2>Un prix simple</h2>
+<div class="tarif">
+<div class="big">3 000 F <small>par mois</small></div>
+<p>Après 5 jours gratuits pour essayer.</p>
+<ul>
+<li>0 commission sur tes ventes</li>
+<li>Articles et photos de ta boutique</li>
+<li>Commandes directes sur WhatsApp</li>
+</ul>
+</div>
+</section>
+
+<section class="faq">
+<h2>Questions fréquentes</h2>
+<details><summary>Dois-je payer pour essayer ?</summary><p>Non, les 5 premiers jours sont gratuits.</p></details>
+<details><summary>Mes clients doivent-ils créer un compte ?</summary><p>Non, ils ouvrent ton lien et commandent.</p></details>
+<details><summary>Comment je reçois l’argent ?</summary><p>Directement de ton client, par Wave, MTN ou en main propre. Brobroli ne touche pas à ton argent.</p></details>
+<details><summary>Puis-je changer mes prix ?</summary><p>Écris-nous sur WhatsApp et nous modifions ta boutique avec toi.</p></details>
+</section>
+
 <div class="final">
 <h2>Ta boutique est prête à ouvrir.</h2>
-<p>Gratuit pour commencer. Une boutique en 5 minutes.</p>
-<a href="create.html" id="cta">Créer ma boutique</a>
+<p>5 jours gratuits, puis 3 000 F par mois. Zéro commission.</p>
+<a href="create.html" id="cta">Crée ma boutique gratuitement</a>
 </div>
-<footer>© 2026 Brobroli – Fait pour les vendeurs qui vivent sur WhatsApp. · <a href="admin.html" style="color:inherit">Admin</a></footer>
+<footer>© 2026 Brobroli – Fait pour les vendeurs qui vivent sur WhatsApp. · <a href="admin.html">Admin</a></footer>
 </div>
 
 <script src="script.js"></script>
