@@ -1,1 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Administration – Brobroli</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=Hanken+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
+<style>
+.sh{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.sh h3{font-size:20px}
+.sh p{margin:2px 0;color:var(--soft);font-size:15px}
+.st{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:600;margin-left:6px}
+.st.ok{background:#cfe8d5;color:#0f3d2a}.st.ko{background:#f5c6c0;color:#7a1f14}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.acts button,.acts a{border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:10px;padding:8px 12px;font:600 14px "Hanken Grotesk",sans-serif;text-decoration:none;cursor:pointer}
+.acts .p{background:var(--ink);color:var(--bg)}
+.acts button:focus-visible,.acts a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap narrow">
+<header><a class="logo" href="index.html">Brobroli<span>.</span></a></header>
+<h1 class="t">Administration</h1>
+
+<div id="login">
+<div class="f"><label for="em">E-mail</label><input class="tx" id="em" type="email" autocomplete="username" autocapitalize="none"></div>
+<div class="f"><label for="pw">Mot de passe</label><input class="tx" id="pw" type="password" autocomplete="current-password"></div>
+<button class="go" id="in" type="button">Se connecter</button>
+<p class="err" id="lerr" role="alert"></p>
+</div>
+
+<div id="panel" hidden>
+<div class="f"><input class="tx" id="q" placeholder="Rechercher une boutique…" aria-label="Rechercher une boutique"></div>
+<p class="info" id="count"></p>
+<div id="list"></div>
+<button class="add" id="out" type="button">Se déconnecter</button>
+</div>
+</div>
+
+<script src="app.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  if (DEMO) { $("login").innerHTML = '<p class="lead">Branche Supabase dans app.js pour utiliser cette page.</p>'; return; }
+  var token = "", shops = [];
+  function hd(extra) {
+    var h = headers(); h.Authorization = "Bearer " + token;
+    if (extra) for (var k in extra) h[k] = extra[k];
+    return h;
+  }
+  function rest(path) { return CONFIG.SUPABASE_URL + "/rest/v1/shops" + path; }
+
+  $("in").onclick = function () {
+    $("lerr").textContent = "";
+    fetch(CONFIG.SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: { apikey: CONFIG.SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: $("em").value.trim(), password: $("pw").value })
+    }).then(function (r) {
+      return r.json().then(function (j) { if (!r.ok || !j.access_token) throw new Error("auth"); return j; });
+    }).then(function (j) {
+      token = j.access_token; $("pw").value = "";
+      $("login").hidden = true; $("panel").hidden = false; load();
+    }).catch(function () { $("lerr").textContent = "E-mail ou mot de passe incorrect."; });
+  };
+  $("out").onclick = function () { token = ""; shops = []; $("panel").hidden = true; $("login").hidden = false; };
+  $("q").addEventListener("input", draw);
+
+  function load() {
+    fetch(rest("?select=slug,name,whatsapp,expires_at,created_at&order=created_at.desc&limit=500"), { headers: hd() })
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (a) { shops = a; draw(); })
+      .catch(function () { $("count").textContent = "Impossible de charger les boutiques. Reconnecte-toi."; });
+  }
+  function days(s) { return Math.ceil((new Date(s.expires_at) - Date.now()) / 864e5); }
+  function find(slug) { for (var i = 0; i < shops.length; i++) if (shops[i].slug === slug) return shops[i]; }
+
+  function draw() {
+    var q = $("q").value.trim().toLowerCase(), h = "", n = 0;
+    shops.forEach(function (s) {
+      if (q && (s.slug + " " + s.name + " " + s.whatsapp).toLowerCase().indexOf(q) < 0) return;
+      n++;
+      var d = days(s), live = d > 0, end = new Date(s.expires_at).toLocaleDateString("fr-FR");
+      h += '<div class="sh"><h3>' + esc(s.name) + '<span class="st ' + (live ? "ok" : "ko") + '">' + (live ? "Active · " + d + " j" : "Expirée") + '</span></h3>' +
+        '<p>' + esc(s.slug) + ' · ' + esc(s.whatsapp) + '</p><p>Fin : ' + esc(end) + '</p>' +
+        '<div class="acts"><button class="p" type="button" data-a="add" data-s="' + esc(s.slug) + '">+30 jours</button>' +
+        '<a href="shop.html?b=' + encodeURIComponent(s.slug) + '" target="_blank" rel="noopener">Voir</a>' +
+        '<a href="https://wa.me/' + encodeURIComponent(s.whatsapp) + '" target="_blank" rel="noopener">WhatsApp</a>' +
+        '<button type="button" data-a="del" data-s="' + esc(s.slug) + '">Supprimer</button></div></div>';
+    });
+    $("count").textContent = n + " boutique" + (n > 1 ? "s" : "");
+    $("list").innerHTML = h;
+  }
+
+  $("list").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-a]");
+    if (!b) return;
+    var slug = b.dataset.s, s = find(slug);
+    if (!s) return;
+    if (b.dataset.a === "add") {
+      var base = Math.max(new Date(s.expires_at).getTime() || 0, Date.now());
+      var iso = new Date(base + 30 * 864e5).toISOString();
+      b.disabled = true;
+      fetch(rest("?slug=eq." + encodeURIComponent(slug)), {
+        method: "PATCH", headers: hd({ Prefer: "return=representation" }), body: JSON.stringify({ expires_at: iso })
+      }).then(function (r) { return r.json(); }).then(function (a) {
+        if (!a.length) throw 0;
+        s.expires_at = a[0].expires_at; draw();
+      }).catch(function () { b.disabled = false; alert("Action refusée. Vérifie les règles SQL et reconnecte-toi."); });
+    } else if (b.dataset.a === "del") {
+      if (!confirm("Supprimer définitivement la boutique « " + s.name + " » ?")) return;
+      fetch(rest("?slug=eq." + encodeURIComponent(slug)), {
+        method: "DELETE", headers: hd({ Prefer: "return=representation" })
+      }).then(function (r) { return r.json(); }).then(function (a) {
+        if (!a.length) throw 0;
+        shops = shops.filter(function (x) { return x.slug !== slug; }); draw();
+      }).catch(function () { alert("Suppression refusée. Vérifie les règles SQL et reconnecte-toi."); });
+    }
+  });
+})();
+</script>
+</body>
+</html>
 
