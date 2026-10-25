@@ -1,1 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boutique – Brobroli</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=Hanken+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap" style="padding-bottom:48px">
+<div id="root"><p class="lead">Chargement de la boutique…</p></div>
+</div>
+<script src="app.js"></script>
+<script>
+(function () {
+  var root = document.getElementById("root");
+  var slug = (new URLSearchParams(location.search).get("b") || (location.pathname.split("/").pop() || "").replace(/\.html$/, "")).toLowerCase();
+  if (slug === "shop") slug = "";
+  function msg(t) { root.innerHTML = '<p class="lead">' + esc(t) + '</p><p class="info"><a href="index.html">Créer ma boutique avec Brobroli</a></p>'; }
+  if (!slug) return msg("Aucune boutique n’est indiquée dans ce lien.");
+  loadShop(slug).then(function (s) {
+    if (!s) return msg("Cette boutique n’existe pas.");
+    show(s);
+  })
+    .catch(function () { msg("Impossible de charger la boutique. Réessaie dans un instant."); });
+
+  function show(s) {
+    document.title = s.name + " – Brobroli";
+    var pro = !!(s.pro_until && new Date(s.pro_until) > new Date());
+    var items = (s.items || []).slice(0, pro ? 40 : 10), cart = {}, colors = ["#f6d98a", "#f1c4a3", "#e9a9b3", "#cfe3c0"];
+    root.innerHTML = '<h1 class="t" style="margin-top:28px">' + esc(s.name) + '</h1>' +
+      (s.delivery ? '<p class="info"><b>Livraison :</b> ' + esc(s.delivery) + '</p>' : '') +
+      (s.payments ? '<p class="info"><b>Paiement :</b> ' + esc(s.payments) + '</p>' : '') +
+      '<div class="demo"><div class="items" id="items"></div>' +
+      '<aside class="cart"><h3>Ma commande</h3><div id="lines"></div>' +
+      '<div class="total"><span>Total</span><span id="total">0 F</span></div>' +
+      '<div class="f"><label for="who">Ton nom et ton quartier</label><input class="tx" id="who" maxlength="80"></div>' +
+      '<a class="order" id="order" aria-disabled="true" href="#" target="_blank" rel="noopener">Commander sur WhatsApp</a>' +
+      (/^https:\/\//i.test(s.wave || "") ? '<a class="add" style="margin-top:10px" href="' + esc(s.wave) + '" target="_blank" rel="noopener">Payer avec Wave</a><p class="info">Après le paiement, envoie la capture sur WhatsApp.</p>' : '') +
+      (/^\d{9,15}$/.test(s.phone || "") ? '<a class="add" style="margin-top:10px" href="tel:+' + esc(s.phone) + '">Appeler le vendeur</a>' : '') +
+      '</aside></div>' +
+      (pro ? "" : '<p class="info" style="margin-top:28px">Boutique créée avec <a href="index.html">Brobroli</a></p>');
+
+    var box = document.getElementById("items");
+    items.forEach(function (it, i) {
+      var d = document.createElement("div");
+      d.className = "item";
+      var pic = String(it.img || "").indexOf("data:image/") === 0
+        ? '<div class="ph"><img alt="' + esc(it.n) + '" src="' + esc(it.img) + '"></div>'
+        : '<div class="ph" style="background:' + colors[i % 4] + '">🛍️</div>';
+      d.innerHTML = pic + '<h3>' + esc(it.n) + '</h3><div class="price">' + fmt(it.p) + '</div><button class="add" type="button">Ajouter</button>';
+      d.querySelector("button").onclick = function () { cart[i] = (cart[i] || 0) + 1; draw(); };
+      box.appendChild(d);
+    });
+
+    var who = document.getElementById("who");
+    who.addEventListener("input", draw);
+    function draw() {
+      var lines = document.getElementById("lines"), t = 0, txt = [], h = "";
+      items.forEach(function (it, i) {
+        var q = cart[i]; if (!q) return;
+        t += q * it.p; txt.push("- " + q + " x " + it.n);
+        h += '<div class="row"><span>' + esc(it.n) + '</span><span class="qty"><button type="button" aria-label="Retirer" data-d="-1" data-i="' + i + '">−</button>' + q +
+          '<button type="button" aria-label="Ajouter" data-d="1" data-i="' + i + '">+</button></span></div>';
+      });
+      lines.innerHTML = h || '<p class="empty">Ton panier est vide. Ajoute un article.</p>';
+      lines.querySelectorAll("button").forEach(function (b) {
+        b.onclick = function () {
+          var i = b.dataset.i; cart[i] = (cart[i] || 0) + Number(b.dataset.d);
+          if (cart[i] <= 0) delete cart[i]; draw();
+        };
+      });
+      document.getElementById("total").textContent = fmt(t);
+      var o = document.getElementById("order");
+      if (t) {
+        o.removeAttribute("aria-disabled");
+        var text = "Bonjour, je veux commander chez " + s.name + " :\n" + txt.join("\n") + "\nTotal : " + fmt(t) +
+          (who.value.trim() ? "\nNom et quartier : " + who.value.trim() : "");
+        o.href = "https://wa.me/" + s.whatsapp + "?text=" + encodeURIComponent(text);
+      } else { o.setAttribute("aria-disabled", "true"); o.href = "#"; }
+    }
+    draw();
+  }
+})();
+</script>
+</body>
+</html>
 
