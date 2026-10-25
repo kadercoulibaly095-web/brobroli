@@ -119,6 +119,10 @@
     var wave = $("wave").value.trim();
     if (wave && !/^https:\/\//i.test(wave)) return fail("Le lien Wave doit commencer par https://");
     if (wave) shop.wave = wave;
+    var phone = $("phone").value.replace(/\D/g, "").replace(/^00/, "");
+    if (/^0\d{9}$/.test(phone)) phone = "225" + phone;
+    if (phone && (phone.length < 9 || phone.length > 15)) return fail("Vérifie ton numéro d’appel, avec l’indicatif du pays.");
+    if (phone) shop.phone = phone;
     var btn = $("publish");
     btn.disabled = true; btn.textContent = "Publication…";
     tryPublish(shop, slug, 0).then(function () {
