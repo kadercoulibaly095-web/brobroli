@@ -22,14 +22,14 @@
   if (!slug) return msg("Aucune boutique n’est indiquée dans ce lien.");
   loadShop(slug).then(function (s) {
     if (!s) return msg("Cette boutique n’existe pas.");
-    if (s.expires_at && new Date(s.expires_at) < new Date()) return msg("Cette boutique est temporairement indisponible. Reviens plus tard.");
     show(s);
   })
     .catch(function () { msg("Impossible de charger la boutique. Réessaie dans un instant."); });
 
   function show(s) {
     document.title = s.name + " – Brobroli";
-    var items = s.items || [], cart = {}, colors = ["#f6d98a", "#f1c4a3", "#e9a9b3", "#cfe3c0"];
+    var pro = !!(s.pro_until && new Date(s.pro_until) > new Date());
+    var items = (s.items || []).slice(0, pro ? 40 : 10), cart = {}, colors = ["#f6d98a", "#f1c4a3", "#e9a9b3", "#cfe3c0"];
     root.innerHTML = '<h1 class="t" style="margin-top:28px">' + esc(s.name) + '</h1>' +
       (s.delivery ? '<p class="info"><b>Livraison :</b> ' + esc(s.delivery) + '</p>' : '') +
       (s.payments ? '<p class="info"><b>Paiement :</b> ' + esc(s.payments) + '</p>' : '') +
@@ -41,7 +41,7 @@
       (/^https:\/\//i.test(s.wave || "") ? '<a class="add" style="margin-top:10px" href="' + esc(s.wave) + '" target="_blank" rel="noopener">Payer avec Wave</a><p class="info">Après le paiement, envoie la capture sur WhatsApp.</p>' : '') +
       (/^\d{9,15}$/.test(s.phone || "") ? '<a class="add" style="margin-top:10px" href="tel:+' + esc(s.phone) + '">Appeler le vendeur</a>' : '') +
       '</aside></div>' +
-      '<p class="info" style="margin-top:28px">Boutique créée avec <a href="index.html">Brobroli</a></p>';
+      (pro ? "" : '<p class="info" style="margin-top:28px">Boutique créée avec <a href="index.html">Brobroli</a></p>');
 
     var box = document.getElementById("items");
     items.forEach(function (it, i) {
