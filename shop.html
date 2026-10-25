@@ -39,6 +39,7 @@
       '<div class="f"><label for="who">Ton nom et ton quartier</label><input class="tx" id="who" maxlength="80"></div>' +
       '<a class="order" id="order" aria-disabled="true" href="#" target="_blank" rel="noopener">Commander sur WhatsApp</a>' +
       (/^https:\/\//i.test(s.wave || "") ? '<a class="add" style="margin-top:10px" href="' + esc(s.wave) + '" target="_blank" rel="noopener">Payer avec Wave</a><p class="info">Après le paiement, envoie la capture sur WhatsApp.</p>' : '') +
+      (/^\d{9,15}$/.test(s.phone || "") ? '<a class="add" style="margin-top:10px" href="tel:+' + esc(s.phone) + '">Appeler le vendeur</a>' : '') +
       '</aside></div>' +
       '<p class="info" style="margin-top:28px">Boutique créée avec <a href="index.html">Brobroli</a></p>';
 
