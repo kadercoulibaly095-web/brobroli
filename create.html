@@ -30,12 +30,12 @@
 <div class="f"><label for="delivery">Livraison (facultatif)</label><input class="tx" id="delivery" maxlength="120" placeholder="Ex : Cocody 1 000 F, Yopougon 1 500 F"></div>
 <div class="f"><label for="wave">Lien de paiement Wave (facultatif)</label><input class="tx" id="wave" type="url" inputmode="url" autocapitalize="none" spellcheck="false" placeholder="https://pay.wave.com/..."><small>Colle le lien de paiement de ton Wave Business. Tes clients pourront payer avec.</small></div>
 <div class="f"><label for="phone">Numéro pour t’appeler (facultatif)</label><input class="tx" id="phone" type="tel" inputmode="tel" placeholder="0584151920"><small>Tes clients pourront t’appeler d’un clic. Souvent, c’est le même numéro que WhatsApp.</small></div>
-
+<div class="f"><span class="lb">Tes articles</span><small style="margin:-2px 0 8px">Gratuit : les 10 premiers sont visibles. Avec le Pro, tous.</small><div id="arts"></div>
 <button class="add" id="addArt" type="button">+ Ajouter un article</button></div>
 <button class="go" id="publish" type="button">Publier ma boutique</button>
 <p class="err" id="err" role="alert"></p>
 </div>
-<span class="lb">Tes articles</span><small style="margin:-2px 0 8px">Gratuit : les 10 premiers sont visibles. Avec le Pro, tous.</small>
+
 <div class="ok" id="done" hidden>
 <h2>Ta boutique est en ligne</h2>
 <p class="info">Partage ce lien à tes clients :</p>
@@ -53,7 +53,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var MAX = 40;
   var ABO = { prix: "3 000 F", essai: 5, payLink: "https://pay.wave.com/m/M_ci_HSbImDT_M_Ro/c/ci/", mtn: "0584151920", whatsapp: "2250584151920" };
-  var SHORT = true; // true = lien court (monsite.netlify.app/chez-aminata), avec le fichier _redirects
+  var SHORT = true; // true = lien court (ex : brobroli.pages.dev/chez-aminata), avec le fichier 404.html
   if (DEMO) $("demoNote").hidden = false;
 
   var nameEl = $("name"), slugEl = $("slug"), slugTouched = false;
@@ -129,7 +129,6 @@
       var url = SHORT ? location.origin + "/" + shop.slug : new URL("shop.html?b=" + shop.slug, location.href).href;
       $("formBox").hidden = true; $("done").hidden = false;
       $("shopLink").textContent = url;
-      var end = new Date(Date.now() + ABO.essai * 864e5).toLocaleDateString("fr-FR");
       var proof = "https://wa.me/" + ABO.whatsapp + "?text=" + encodeURIComponent("Bonjour, voici ma preuve de paiement pour ma boutique " + name + " : " + url);
       var h = "<b>Ta boutique est en version Gratuite</b> (10 articles visibles, avec la mention Brobroli). Passe au <b>Pro</b> pour " + ABO.prix + " par mois : tous tes articles et sans la mention Brobroli.";
       h += '<div style="display:grid;gap:8px;margin:12px 0">';
