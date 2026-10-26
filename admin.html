@@ -13,7 +13,7 @@
 .sh h3{font-size:20px}
 .sh p{margin:2px 0;color:var(--soft);font-size:15px}
 .st{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:600;margin-left:6px}
-.st.ok{background:#cfe8d5;color:#0f3d2a}.st.ko{background:#f5c6c0;color:#7a1f14}
+.st.ok{background:#cfe8d5;color:#0f3d2a}.st.ko{background:#f5c6c0;color:#7a1f14}.st.fr{background:#e7e2d0;color:#4b5f55}
 .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .acts button,.acts a{border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:10px;padding:8px 12px;font:600 14px "Hanken Grotesk",sans-serif;text-decoration:none;cursor:pointer}
 .acts .p{background:var(--ink);color:var(--bg)}
@@ -72,12 +72,12 @@
   $("refresh").onclick = function () { $("count").textContent = "Chargement…"; load(); };
 
   function load() {
-    fetch(rest("?select=slug,name,whatsapp,expires_at,created_at&order=created_at.desc&limit=500"), { headers: hd() })
+    fetch(rest("?select=slug,name,whatsapp,pro_until,created_at&order=created_at.desc&limit=500"), { headers: hd() })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
       .then(function (a) { shops = a; draw(); })
       .catch(function () { $("count").textContent = "Impossible de charger les boutiques. Reconnecte-toi."; });
   }
-  function days(s) { return Math.ceil((new Date(s.expires_at) - Date.now()) / 864e5); }
+  function days(s) { return s.pro_until ? Math.ceil((new Date(s.pro_until) - Date.now()) / 864e5) : 0; }
   function find(slug) { for (var i = 0; i < shops.length; i++) if (shops[i].slug === slug) return shops[i]; }
 
   function draw() {
@@ -85,10 +85,10 @@
     shops.forEach(function (s) {
       if (q && (s.slug + " " + s.name + " " + s.whatsapp).toLowerCase().indexOf(q) < 0) return;
       n++;
-      var d = days(s), live = d > 0, end = new Date(s.expires_at).toLocaleDateString("fr-FR");
-      h += '<div class="sh"><h3>' + esc(s.name) + '<span class="st ' + (live ? "ok" : "ko") + '">' + (live ? "Active · " + d + " j" : "Expirée") + '</span></h3>' +
-        '<p>' + esc(s.slug) + ' · ' + esc(s.whatsapp) + '</p><p>Fin : ' + esc(end) + '</p>' +
-        '<div class="acts"><button class="p" type="button" data-a="add" data-s="' + esc(s.slug) + '">+30 jours</button>' +
+      var d = days(s), live = d > 0, end = live ? new Date(s.pro_until).toLocaleDateString("fr-FR") : "";
+      h += '<div class="sh"><h3>' + esc(s.name) + '<span class="st ' + (live ? "ok" : "fr") + '">' + (live ? "Pro · " + d + " j" : "Gratuit") + '</span></h3>' +
+        '<p>' + esc(s.slug) + ' · ' + esc(s.whatsapp) + '</p>' + (live ? '<p>Pro jusqu’au ' + esc(end) + '</p>' : '') +
+        '<div class="acts"><button class="p" type="button" data-a="add" data-s="' + esc(s.slug) + '">Pro +30 jours</button>' +
         '<a href="shop.html?b=' + encodeURIComponent(s.slug) + '" target="_blank" rel="noopener">Voir</a>' +
         '<a href="https://wa.me/' + encodeURIComponent(s.whatsapp) + '" target="_blank" rel="noopener">WhatsApp</a>' +
         '<button type="button" data-a="del" data-s="' + esc(s.slug) + '">Supprimer</button></div></div>';
@@ -103,14 +103,14 @@
     var slug = b.dataset.s, s = find(slug);
     if (!s) return;
     if (b.dataset.a === "add") {
-      var base = Math.max(new Date(s.expires_at).getTime() || 0, Date.now());
+      var base = Math.max(new Date(s.pro_until).getTime() || 0, Date.now());
       var iso = new Date(base + 30 * 864e5).toISOString();
       b.disabled = true;
       fetch(rest("?slug=eq." + encodeURIComponent(slug)), {
-        method: "PATCH", headers: hd({ Prefer: "return=representation" }), body: JSON.stringify({ expires_at: iso })
+        method: "PATCH", headers: hd({ Prefer: "return=representation" }), body: JSON.stringify({ pro_until: iso })
       }).then(function (r) { return r.json(); }).then(function (a) {
         if (!a.length) throw 0;
-        s.expires_at = a[0].expires_at; draw();
+        s.pro_until = a[0].pro_until; draw();
       }).catch(function () { b.disabled = false; alert("Action refusée. Vérifie les règles SQL et reconnecte-toi."); });
     } else if (b.dataset.a === "del") {
       if (!confirm("Supprimer définitivement la boutique « " + s.name + " » ?")) return;
