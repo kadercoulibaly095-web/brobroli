@@ -63,19 +63,24 @@
     }).then(function (r) {
       return r.json().then(function (j) { if (!r.ok || !j.access_token) throw new Error("auth"); return j; });
     }).then(function (j) {
-      token = j.access_token; $("pw").value = "";
+      token = j.access_token; $("pw").value = ""; try { sessionStorage.setItem("bb_tok", token); } catch (e) {}
       $("login").hidden = true; $("panel").hidden = false; load();
     }).catch(function () { $("lerr").textContent = "E-mail ou mot de passe incorrect."; });
   };
-  $("out").onclick = function () { token = ""; shops = []; $("panel").hidden = true; $("login").hidden = false; };
+  $("out").onclick = function () { try { sessionStorage.removeItem("bb_tok"); } catch (e) {} token = ""; shops = []; $("panel").hidden = true; $("login").hidden = false; };
   $("q").addEventListener("input", draw);
   $("refresh").onclick = function () { $("count").textContent = "Chargement…"; load(); };
+  try { var saved = sessionStorage.getItem("bb_tok"); if (saved) { token = saved; $("login").hidden = true; $("panel").hidden = false; load(); } } catch (e) {}
 
   function load() {
     fetch(rest("?select=slug,name,whatsapp,pro_until,created_at&order=created_at.desc&limit=500"), { headers: hd() })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
       .then(function (a) { shops = a; draw(); })
-      .catch(function () { $("count").textContent = "Impossible de charger les boutiques. Reconnecte-toi."; });
+      .catch(function () {
+        token = ""; try { sessionStorage.removeItem("bb_tok"); } catch (e) {}
+        $("panel").hidden = true; $("login").hidden = false;
+        $("lerr").textContent = "Session expirée ou chargement impossible. Reconnecte-toi.";
+      });
   }
   function days(s) { return s.pro_until ? Math.ceil((new Date(s.pro_until) - Date.now()) / 864e5) : 0; }
   function find(slug) { for (var i = 0; i < shops.length; i++) if (shops[i].slug === slug) return shops[i]; }
@@ -89,7 +94,7 @@
       h += '<div class="sh"><h3>' + esc(s.name) + '<span class="st ' + (live ? "ok" : "fr") + '">' + (live ? "Pro · " + d + " j" : "Gratuit") + '</span></h3>' +
         '<p>' + esc(s.slug) + ' · ' + esc(s.whatsapp) + '</p>' + (live ? '<p>Pro jusqu’au ' + esc(end) + '</p>' : '') +
         '<div class="acts"><button class="p" type="button" data-a="add" data-s="' + esc(s.slug) + '">Pro +30 jours</button>' +
-        '<a href="shop.html?b=' + encodeURIComponent(s.slug) + '" target="_blank" rel="noopener">Voir</a>' +
+        '<a href="shop.html?b=' + encodeURIComponent(s.slug) + '&admin=1">Voir</a>' +
         '<a href="https://wa.me/' + encodeURIComponent(s.whatsapp) + '" target="_blank" rel="noopener">WhatsApp</a>' +
         '<button type="button" data-a="del" data-s="' + esc(s.slug) + '">Supprimer</button></div></div>';
     });
