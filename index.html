@@ -30,7 +30,8 @@ footer a{color:inherit}
 <body>
 <div class="wrap">
 <header><div class="logo">Brobroli<span>.</span></div><a class="pill" href="#demo">Voir un exemple</a></header>
-
+  
+<div id="mine" style="margin-top:8px"></div>
 <h1>Ta boutique.<br>Ton WhatsApp.<br>Ton <mark>brobroli</mark>.</h1>
 <p class="sub">Arrête d’envoyer 50 photos tu n'est pas fatigué ?.<br><em>Envoie ta boutique.</em></p>
 <p class="lead" style="margin-bottom:10px">Tes articles et tes prix sur une seule page. Tes clients choisissent, voient le total, et la commande arrive toute prête sur ton WhatsApp. Plus de messages perdus, plus de « c’est combien ? ».</p>
@@ -121,6 +122,27 @@ footer a{color:inherit}
 <footer>© 2026 Brobroli – Fait pour les vendeurs qui vivent sur WhatsApp. · <a href="admin.html">Admin</a></footer>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js"></script> 
+<script>
+(function () {
+  try {
+    var list = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"), box = document.getElementById("mine");
+    if (!box || !list.length) return;
+    list.slice(-3).reverse().forEach(function (s) {
+      var d = document.createElement("div");
+      d.style.cssText = "background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;margin:0 0 14px";
+      var t = document.createElement("b"); t.textContent = "Ta boutique « " + s.name + " »";
+      var a = document.createElement("a"); a.href = s.url; a.textContent = s.url;
+      a.style.cssText = "display:block;word-break:break-all;color:inherit;font-weight:600;margin:6px 0";
+      var b = document.createElement("button"); b.type = "button"; b.className = "add"; b.textContent = "Copier le lien";
+      b.onclick = function () {
+        (navigator.clipboard ? navigator.clipboard.writeText(s.url) : Promise.reject()).then(function () { b.textContent = "Lien copié"; }, function () { b.textContent = "Copie le lien ci-dessus"; });
+      };
+      d.appendChild(t); d.appendChild(a); d.appendChild(b); box.appendChild(d);
+    });
+  } catch (e) {}
+})();
+</script>
+
 </body>
 </html>
