@@ -11,6 +11,8 @@
 <body>
 <div class="wrap narrow">
 <header><a class="logo" href="index.html">Brobroli<span>.</span></a><a class="pill" href="index.html">Retour</a></header>
+<div id="mine"></div>
+
 <h1 class="t">Crée ta boutique</h1>
 <p class="lead">Ajoute tes articles. Tu reçois un lien à partager, et les commandes arrivent sur ton WhatsApp.</p>
 <p class="note" id="demoNote" hidden>Mode test : ta boutique est enregistrée seulement sur cet appareil. Branche Supabase dans app.js pour la rendre visible par tout le monde.</p>
@@ -128,6 +130,8 @@
     btn.disabled = true; btn.textContent = "Publication…";
     tryPublish(shop, slug, 0).then(function () {
       var url = SHORT ? location.origin + "/" + shop.slug : new URL("shop.html?b=" + shop.slug, location.href).href;
+       try { var mine = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"); mine.push({ slug: shop.slug, name: name, url: url }); localStorage.setItem("brobroli:mine", JSON.stringify(mine.slice(-10))); } catch (e) {}
+
       $("formBox").hidden = true; $("done").hidden = false;
       $("shopLink").textContent = url;
       var proof = "https://wa.me/" + ABO.whatsapp + "?text=" + encodeURIComponent("Bonjour, voici ma preuve de paiement pour ma boutique " + name + " : " + url);
@@ -153,5 +157,26 @@
   };
 })();
 </script>
+  <script>
+(function () {
+  try {
+    var list = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"), box = document.getElementById("mine");
+    if (!box || !list.length) return;
+    list.slice(-3).reverse().forEach(function (s) {
+      var d = document.createElement("div");
+      d.style.cssText = "background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;margin:0 0 14px";
+      var t = document.createElement("b"); t.textContent = "Ta boutique « " + s.name + " »";
+      var a = document.createElement("a"); a.href = s.url; a.textContent = s.url;
+      a.style.cssText = "display:block;word-break:break-all;color:inherit;font-weight:600;margin:6px 0";
+      var b = document.createElement("button"); b.type = "button"; b.className = "add"; b.textContent = "Copier le lien";
+      b.onclick = function () {
+        (navigator.clipboard ? navigator.clipboard.writeText(s.url) : Promise.reject()).then(function () { b.textContent = "Lien copié"; }, function () { b.textContent = "Copie le lien ci-dessus"; });
+      };
+      d.appendChild(t); d.appendChild(a); d.appendChild(b); box.appendChild(d);
+    });
+  } catch (e) {}
+})();
+</script>
+
 </body>
 </html>
