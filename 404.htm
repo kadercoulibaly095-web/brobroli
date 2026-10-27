@@ -38,6 +38,21 @@
     var pro = !!(s.pro_until && new Date(s.pro_until) > new Date());
     var items = (s.items || []).slice(0, pro ? 40 : 10), cart = {}, colors = ["#f6d98a", "#f1c4a3", "#e9a9b3", "#cfe3c0"];
     root.innerHTML = '<p class="info" style="margin:28px 0 0;font-size:17px">Bienvenue dans la boutique de</p><h1 class="t" style="margin-top:4px">' + esc(s.name) + '</h1>' +
+      
+    if (new URLSearchParams(location.search).get("admin") === "1") {
+      var link = location.origin + "/shop.html?b=" + encodeURIComponent(s.slug);
+      var lb = document.createElement("div");
+      lb.style.cssText = "background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;margin:14px 0";
+      var lt = document.createElement("b"); lt.textContent = "Lien de cette boutique";
+      var la = document.createElement("div"); la.style.cssText = "word-break:break-all;margin:6px 0"; la.textContent = link;
+      var lc = document.createElement("button"); lc.type = "button"; lc.className = "add"; lc.textContent = "Copier le lien";
+      lc.onclick = function () {
+        (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(function () { lc.textContent = "Lien copié"; }, function () { lc.textContent = "Copie le lien affiché"; });
+      };
+      lb.appendChild(lt); lb.appendChild(la); lb.appendChild(lc);
+      root.insertBefore(lb, root.children[2] || null);
+    }
+
       (s.delivery ? '<p class="info"><b>Livraison :</b> ' + esc(s.delivery) + '</p>' : '') +
       (s.payments ? '<p class="info"><b>Paiement :</b> ' + esc(s.payments) + '</p>' : '') +
       '<div class="demo"><div class="items" id="items"></div>' +
