@@ -92,8 +92,10 @@
       n++;
       var d = days(s), live = d > 0, end = live ? new Date(s.pro_until).toLocaleDateString("fr-FR") : "";
       h += '<div class="sh"><h3>' + esc(s.name) + '<span class="st ' + (live ? "ok" : "fr") + '">' + (live ? "Pro · " + d + " j" : "Gratuit") + '</span></h3>' +
-        '<p>' + esc(s.slug) + ' · ' + esc(s.whatsapp) + '</p>' + (live ? '<p>Pro jusqu’au ' + esc(end) + '</p>' : '') +
-        '<div class="acts"><button class="p" type="button" data-a="add" data-s="' + esc(s.slug) + '">Pro +30 jours</button>' +
+        '<p>' + esc(s.slug) + ' · ' + esc(s.whatsapp) + '</p><p style="word-break:break-all">' + esc(location.origin + "/shop.html?b=" + s.slug) + '</p>' +
+ (live ? '<p>Pro jusqu’au ' + esc(end) + '</p>' : '') +
+        '<div class="acts"><button class="p" type="button" data-a="add" data-s="' + esc(s.slug) + '">Pro +30 jours</button>' + '<button type="button" data-a="copy" data-s="' + esc(s.slug) + '">Copier le lien</button>' +
+
         '<a href="shop.html?b=' + encodeURIComponent(s.slug) + '&admin=1">Voir</a>' +
         '<a href="https://wa.me/' + encodeURIComponent(s.whatsapp) + '" target="_blank" rel="noopener">WhatsApp</a>' +
         '<button type="button" data-a="del" data-s="' + esc(s.slug) + '">Supprimer</button></div></div>';
@@ -107,7 +109,11 @@
     if (!b) return;
     var slug = b.dataset.s, s = find(slug);
     if (!s) return;
-    if (b.dataset.a === "add") {
+    if (b.dataset.a === "copy") {
+      var link = location.origin + "/shop.html?b=" + encodeURIComponent(slug);
+      (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(function () { b.textContent = "Lien copié"; }, function () { b.textContent = "Copie le lien affiché"; });
+    } else if (b.dataset.a === "add") {
+
       var base = Math.max(new Date(s.pro_until).getTime() || 0, Date.now());
       var iso = new Date(base + 30 * 864e5).toISOString();
       b.disabled = true;
