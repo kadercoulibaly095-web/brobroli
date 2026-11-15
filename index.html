@@ -125,8 +125,12 @@ footer a{color:inherit}
 <script src="script.js"></script> 
 <script>
 (function () {
-  try {
+  try }
+  
     var list = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"), box = document.getElementById("mine");
+  list = list.filter(function (s) { return s.slug !== "market-of-man"; });
+localStorage.setItem("brobroli:mine", JSON.stringify(list));
+
     if (!box || !list.length) return;
 
     var toggle = document.createElement("a");
