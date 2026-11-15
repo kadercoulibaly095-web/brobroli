@@ -129,7 +129,9 @@
     var btn = $("publish");
     btn.disabled = true; btn.textContent = "Publication…";
     tryPublish(shop, slug, 0).then(function () {
-      var url = SHORT ? location.origin + "/" + shop.slug : new URL("shop.html?b=" + shop.slug, location.href).href;
+      var url = SHORT ? location.origin + "/s/" + shop.slug : new URL("shop.html?b=" + shop.slug, location.href).href;
+    
+
        try { var mine = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"); mine.push({ slug: shop.slug, name: name, url: url }); localStorage.setItem("brobroli:mine", JSON.stringify(mine.slice(-10))); } catch (e) {}
 
       $("formBox").hidden = true; $("done").hidden = false;
@@ -166,7 +168,9 @@
       var d = document.createElement("div");
       d.style.cssText = "background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;margin:0 0 14px";
       var t = document.createElement("b"); t.textContent = "Ta boutique « " + s.name + " »";
-      var a = document.createElement("a"); a.href = s.url; a.textContent = s.url;
+      var fixed = location.origin + "/s/" + s.slug;
+var a = document.createElement("a"); a.href = fixed; a.textContent = fixed;
+
       a.style.cssText = "display:block;word-break:break-all;color:inherit;font-weight:600;margin:6px 0";
       var b = document.createElement("button"); b.type = "button"; b.className = "add"; b.textContent = "Copier le lien";
       b.onclick = function () {
