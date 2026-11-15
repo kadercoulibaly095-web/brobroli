@@ -174,7 +174,7 @@ var a = document.createElement("a"); a.href = fixed; a.textContent = fixed;
       a.style.cssText = "display:block;word-break:break-all;color:inherit;font-weight:600;margin:6px 0";
       var b = document.createElement("button"); b.type = "button"; b.className = "add"; b.textContent = "Copier le lien";
       b.onclick = function () {
-        (navigator.clipboard ? navigator.clipboard.writeText(s.url) : Promise.reject()).then(function () { b.textContent = "Lien copié"; }, function () { b.textContent = "Copie le lien ci-dessus"; });
+        (navigator.clipboard ? navigator.clipboard. :writeText(fixed) Promise.reject()).then(function () { b.textContent = "Lien copié"; }, function () { b.textContent = "Copie le lien ci-dessus"; });
       };
       d.appendChild(t); d.appendChild(a); d.appendChild(b); box.appendChild(d);
     });
