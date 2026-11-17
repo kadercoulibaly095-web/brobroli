@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gérer ma boutique – Brobroli</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=Hanken+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="wrap narrow">
+<header><a class="logo" href="/index.html">Brobroli<span>.</span></a><a class="pill" href="/index.html">Accueil</a></header>
+
+<h1 class="t">Gérer ma boutique</h1>
+
+<div id="login">
+<p class="lead">Entre le lien de ta boutique et ton code secret pour ajouter des articles.</p>
+<div class="f"><label for="slug">Nom du lien de ta boutique</label><input class="tx" id="slug" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="Ex : kader-smith"><small>C’est la fin de ton lien : brobroli.pages.dev/s/<b>kader-smith</b></small></div>
+<div class="f"><label for="code">Ton code secret</label><input class="tx" id="code" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="8 caractères"></div>
+<button class="go" id="open" type="button">Ouvrir ma boutique</button>
+<p class="err" id="err" role="alert"></p>
+</div>
+
+<div id="panel" hidden>
+<p class="info" id="shopName" style="font-weight:600;font-size:20px;margin:0 0 4px"></p>
+<p class="info" id="count" style="margin:0 0 14px"></p>
+<div id="arts"></div>
+<button class="add" id="addArt" type="button">+ Ajouter un article</button>
+<button class="go" id="save" type="button">Ajouter à ma boutique</button>
+<p class="err" id="err2" role="alert"></p>
+<div class="note" id="full" hidden></div>
+<a class="add" id="seeShop" href="#" style="margin-top:14px">Voir ma boutique</a>
+</div>
+</div>
+
+<script src="/app.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var WA = "2250584151920";
+  var shop = null, slug = "", code = "", limit = 10, cur = 0;
+
+  try {
+    var list = JSON.parse(localStorage.getItem("brobroli:mine") || "[]");
+    var last = list.filter(function (s) { return s.code; }).pop();
+    if (last) { $("slug").value = last.slug; $("code").value = last.code; }
+  } catch (e) {}
+  var qs = new URLSearchParams(location.search).get("s");
+  if (qs) $("slug").value = qs;
+
+  function remaining() { return limit - cur; }
+  function rows() { return document.querySelectorAll("#arts .art").length; }
+
+  function addRow() {
+    if (rows() >= remaining()) { $("err2").textContent = "Tu ne peux pas ajouter plus d’articles pour le moment."; return; }
+    $("err2").textContent = "";
+    var d = document.createElement("div");
+    d.className = "art";
+    d.innerHTML = '<label class="photo"><input type="file" accept="image/*"><span>Photo</span></label>' +
+      '<div class="ai"><input class="tx an" maxlength="60" placeholder="Nom de l’article">' +
+      '<input class="tx ap" inputmode="numeric" placeholder="Prix en F"></div>' +
+      '<button class="rm" type="button" aria-label="Retirer">×</button>';
+    d.querySelector("input[type=file]").addEventListener("change", function (e) {
+      var f = e.target.files[0], box = d.querySelector(".photo");
+      if (!f) return;
+      shrink(f, 520).then(function (data) {
+        d.dataset.img = data;
+        box.style.backgroundImage = "url(" + data + ")";
+        box.classList.add("has");
+      }).catch(function () { $("err2").textContent = "Cette photo n’a pas pu être lue."; });
+    });
+    d.querySelector(".rm").onclick = function () { d.remove(); $("err2").textContent = ""; };
+    $("arts").appendChild(d);
+  }
+
+  function refresh() {
+    var pro = !!(shop.pro_until && new Date(shop.pro_until) > new Date());
+    limit = pro ? 40 : 10;
+    cur = (shop.items || []).length;
+    $("shopName").textContent = shop.name;
+    $("count").textContent = cur + " / " + limit + " articles" + (pro ? " (Pro)" : " (Gratuit)");
+    $("seeShop").href = "/s/" + slug;
+    $("arts").innerHTML = "";
+    var full = remaining() <= 0;
+    $("addArt").hidden = full; $("save").hidden = full;
+    $("full").hidden = !full;
+    if (full) {
+      var msg = pro ? "Tu as atteint la limite de 40 articles." : "Tu as atteint la limite de 10 articles gratuits. Passe au Pro (3 000 F par mois) pour en ajouter jusqu’à 40.";
+      $("full").innerHTML = esc(msg) + (pro ? "" : '<div style="margin-top:10px"><a class="order" target="_blank" rel="noopener" href="https://wa.me/' + WA + '?text=' + encodeURIComponent("Bonjour, je veux passer au Pro pour ma boutique " + slug) + '">Passer au Pro sur WhatsApp</a></div>');
+    } else addRow();
+  }
+
+  $("open").onclick = function () {
+    $("err").textContent = "";
+    slug = slugify($("slug").value); code = $("code").value.trim().toLowerCase();
+    if (!slug || !code) { $("err").textContent = "Écris le nom du lien et ton code secret."; return; }
+    $("open").disabled = true;
+    loadShop(slug).then(function (s) {
+      $("open").disabled = false;
+      if (!s) { $("err").textContent = "Cette boutique n’existe pas."; return; }
+      shop = s;
+      $("login").hidden = true; $("panel").hidden = false;
+      refresh();
+    }).catch(function () { $("open").disabled = false; $("err").textContent = "Impossible de charger la boutique. Réessaie."; });
+  };
+
+  $("addArt").onclick = addRow;
+
+  $("save").onclick = function () {
+    $("err2").textContent = "";
+    var items = [];
+    document.querySelectorAll("#arts .art").forEach(function (r) {
+      var n = r.querySelector(".an").value.trim(), p = parseInt(r.querySelector(".ap").value.replace(/\D/g, ""), 10);
+      if (n && p > 0) items.push({ n: n, p: p, img: r.dataset.img || "" });
+    });
+    if (!items.length) { $("err2").textContent = "Écris le nom et le prix d’au moins un article."; return; }
+    var btn = $("save"); btn.disabled = true; btn.textContent = "Envoi…";
+    addShopItems(slug, code, items).then(function () {
+      return loadShop(slug);
+    }).then(function (s) {
+      btn.disabled = false; btn.textContent = "Ajouter à ma boutique";
+      shop = s; refresh();
+      $("err2").textContent = "";
+      $("count").textContent += " ✓ Articles ajoutés";
+    }).catch(function (e) {
+      btn.disabled = false; btn.textContent = "Ajouter à ma boutique";
+      var m = e.message || "";
+      $("err2").textContent = m === "code" ? "Code secret incorrect." : m === "limit" ? "Limite d’articles atteinte. Passe au Pro pour continuer." : "L’envoi a échoué. Vérifie ta connexion et réessaie.";
+    });
+  };
+})();
+</script>
+</body>
+</html>
