@@ -129,11 +129,12 @@
     if (phone) shop.phone = phone;
     var btn = $("publish");
     btn.disabled = true; btn.textContent = "Publication…";
-    tryPublish(shop, slug, 0).then(function () {
+    var code = newCode();
+tryPublish(shop, slug, 0).then(function () { return setShopCode(shop.slug, code); }).then(function () {
       var url = SHORT ? location.origin + "/s/" + shop.slug : new URL("shop.html?b=" + shop.slug, location.href).href;
     
 
-       try { var mine = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"); mine.push({ slug: shop.slug, name: name, url: url }); localStorage.setItem("brobroli:mine", JSON.stringify(mine.slice(-10))); } catch (e) {}
+       try { var mine = JSON.parse(localStorage.getItem("brobroli:mine") || "[]");mine.push({ slug: shop.slug, name: name, url: url, code: code }); localStorage.setItem("brobroli:mine", JSON.stringify(mine.slice(-10))); } catch (e) {}
 
       $("formBox").hidden = true; $("done").hidden = false;
       $("shopLink").textContent = url;
