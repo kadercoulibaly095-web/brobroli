@@ -164,6 +164,9 @@
 (function () {
   try {
     var list = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"), box = document.getElementById("mine");
+    list = list.filter(function (s) { return s.slug !== "market-of-man"; });
+localStorage.setItem("brobroli:mine", JSON.stringify(list));
+
     if (!box || !list.length) return;
     list.slice(-3).reverse().forEach(function (s) {
       var fixed = location.origin + "/s/" + s.slug;
