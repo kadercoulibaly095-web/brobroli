@@ -57,3 +57,17 @@ function shrink(file, max) {
     fr.readAsDataURL(file);
   });
 }
+function newCode() {
+  var a = "abcdefghjkmnpqrstuvwxyz23456789", s = "", r = crypto.getRandomValues(new Uint8Array(8));
+  for (var i = 0; i < 8; i++) s += a[r[i] % a.length];
+  return s;
+}
+function rpc(name, body) {
+  return fetch(CONFIG.SUPABASE_URL + "/rest/v1/rpc/" + name, { method: "POST", headers: headers(), body: JSON.stringify(body) })
+    .then(function (r) {
+      if (r.ok) return r.json();
+      return r.json().then(function (e) { throw new Error((e && e.message) || "fail"); }, function () { throw new Error("fail"); });
+    });
+}
+function setShopCode(slug, code) { return rpc("set_shop_code", { p_slug: slug, p_code: code }); }
+function addShopItems(slug, code, items) { return rpc("add_shop_items", { p_slug: slug, p_code: code, p_items: items }); }
