@@ -32,7 +32,7 @@
 <div class="f"><label for="delivery">Livraison (facultatif)</label><input class="tx" id="delivery" maxlength="120" placeholder="Ex : Cocody 1 000 F, Yopougon 1 500 F"></div>
 <div class="f"><label for="wave">Lien de paiement Wave (facultatif)</label><input class="tx" id="wave" type="url" inputmode="url" autocapitalize="none" spellcheck="false" placeholder="https://pay.wave.com/..."><small>Colle le lien de paiement de ton Wave Business. Tes clients pourront payer avec.</small></div>
 <div class="f"><label for="phone">Numéro pour t’appeler (facultatif)</label><input class="tx" id="phone" type="tel" inputmode="tel" placeholder="0584151920"><small>Tes clients pourront t’appeler d’un clic. Souvent, c’est le même numéro que WhatsApp.</small></div>
-<div class="f"><span class="lb">Tes articles</span><small style="margin:-2px 0 8px">Gratuit : Gratuit : les 10 premiers articles sont visibles. Avec le Pro (3 000 F par mois) : jusqu’à 40 articles visibles, sans la mention Brobroli.
+<div class="f"><span class="lb">Tes articles</span><small style="margin:-2px 0 8px">Gratuit : jusqu’à 10 articles. Avec le Pro (3 000 F par mois) : jusqu’à 40 articles, sans la mention Brobroli.
 </small><div id="arts"></div>
 <button class="add" id="addArt" type="button">+ Ajouter un article</button></div>
 <button class="go" id="publish" type="button">Publier ma boutique</button>
@@ -43,7 +43,7 @@
 <h2>Ta boutique est en ligne</h2>
 <p class="info">Partage ce lien à tes clients :</p>
 <div class="link" id="shopLink"></div>
-<div class="note" id="codeBox"></div>  
+<div class="note" id="codeBox"></div>
 <div class="note" id="aboBox"></div>
 <a class="order" id="shareWa" target="_blank" rel="noopener" href="#">Partager sur WhatsApp</a>
 <button class="add" id="copy" type="button">Copier le lien</button>
@@ -55,9 +55,9 @@
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var MAX = 40;
+  var MAX = 10;
   var ABO = { prix: "3 000 F", essai: 5, payLink: "https://pay.wave.com/m/M_ci_HSbImDT_M_Ro/c/ci/", mtn: "0584151920", whatsapp: "2250584151920" };
-  var SHORT = true; // true = lien court (ex : brobroli.pages.dev/chez-aminata), avec le fichier 404.html
+  var SHORT = true;
   if (DEMO) $("demoNote").hidden = false;
 
   var nameEl = $("name"), slugEl = $("slug"), slugTouched = false;
@@ -66,8 +66,10 @@
   nameEl.addEventListener("input", function () { if (!slugTouched) slugEl.value = slugify(nameEl.value); });
   slugEl.addEventListener("input", function () { slugTouched = true; slugEl.value = slugEl.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"); });
 
+  function fail(t) { $("err").textContent = t; }
+
   function addRow() {
-    if (document.querySelectorAll(".art").length >= MAX) return;
+    if (document.querySelectorAll(".art").length >= MAX) { fail("Limite de 10 articles atteinte. Passe au Pro pour en ajouter jusqu'à 40."); return; }
     var d = document.createElement("div");
     d.className = "art";
     d.innerHTML = '<label class="photo"><input type="file" accept="image/*"><span>Photo</span></label>' +
@@ -85,14 +87,13 @@
     });
     d.querySelector(".rm").onclick = function () {
       d.remove();
+      $("err").textContent = "";
       if (!document.querySelector(".art")) addRow();
     };
     $("arts").appendChild(d);
   }
   addRow();
   $("addArt").onclick = addRow;
-
-  function fail(t) { $("err").textContent = t; }
 
   function tryPublish(shop, base, n) {
     return saveShop(shop).catch(function (e) {
@@ -130,60 +131,12 @@
     var btn = $("publish");
     btn.disabled = true; btn.textContent = "Publication…";
     var code = newCode();
-tryPublish(shop, slug, 0).then(function () { return setShopCode(shop.slug, code); }).then(function () {
+    tryPublish(shop, slug, 0).then(function () { return setShopCode(shop.slug, code); }).then(function () {
       var url = SHORT ? location.origin + "/s/" + shop.slug : new URL("shop.html?b=" + shop.slug, location.href).href;
-    
-
-       try { var mine = JSON.parse(localStorage.getItem("brobroli:mine") || "[]");mine.push({ slug: shop.slug, name: name, url: url, code: code }); localStorage.setItem("brobroli:mine", JSON.stringify(mine.slice(-10))); } catch (e) {}
+      try { var mine = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"); mine.push({ slug: shop.slug, name: name, url: url, code: code }); localStorage.setItem("brobroli:mine", JSON.stringify(mine.slice(-10))); } catch (e) {}
 
       $("formBox").hidden = true; $("done").hidden = false;
       $("shopLink").textContent = url;
-  $("codeBox").innerHTML = "<b>Ton code secret : " + esc(code) + "</b><br>Garde-le bien (fais une capture d’écran). Il te permettra d’ajouter des articles plus tard. Ne le partage avec personne.";
+      $("codeBox").innerHTML = "<b>Ton code secret : " + esc(code) + "</b><br>Garde-le bien (fais une capture d’écran). Il te permettra d’ajouter des articles plus tard. Ne le partage avec personne.";
       var proof = "https://wa.me/" + ABO.whatsapp + "?text=" + encodeURIComponent("Bonjour, voici ma preuve de paiement pour ma boutique " + name + " : " + url);
-      var h = "<b>Ta boutique est en version Gratuite</b> (10 articles visibles, avec la mention Brobroli). Passe au <b>Pro</b> pour " + ABO.prix + " par mois : tous tes articles et sans la mention Brobroli.";
-      h += '<div style="display:grid;gap:8px;margin:12px 0">';
-      if (ABO.payLink) h += '<a class="order" href="' + esc(ABO.payLink) + '" target="_blank" rel="noopener">Payer avec Wave</a>';
-      if (ABO.mtn) h += '<button class="add" type="button" id="mtnCopy">MTN Money : ' + esc(ABO.mtn) + ' (copier)</button>';
-      h += '</div>Après paiement, <a style="color:inherit;font-weight:600" href="' + proof + '" target="_blank" rel="noopener">envoie la preuve sur WhatsApp</a>.';
-      $("aboBox").innerHTML = h;
-      if ($("mtnCopy")) $("mtnCopy").onclick = function () {
-        (navigator.clipboard ? navigator.clipboard.writeText(ABO.mtn.replace(/\D/g, "")) : Promise.reject()).then(function () { $("mtnCopy").textContent = "Numéro copié"; }, function () { $("mtnCopy").textContent = "Copie le numéro : " + ABO.mtn; });
-      };
-      $("seeShop").href = url;
-      $("shareWa").href = "https://wa.me/?text=" + encodeURIComponent("Découvre ma boutique " + name + " : " + url);
-      $("copy").onclick = function () {
-        (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { $("copy").textContent = "Lien copié"; }, function () { $("copy").textContent = "Copie le lien ci-dessus"; });
-      };
-      window.scrollTo(0, 0);
-    }).catch(function (e) {
-      btn.disabled = false; btn.textContent = "Publier ma boutique";
-      fail(e.message === "taken" ? "Ce lien est déjà pris. Choisis-en un autre." : "La publication a échoué. Vérifie ta connexion et réessaie.");
-    });
-  };
-})();
-</script>
-  <script>
-(function () {
-  try {
-    var list = JSON.parse(localStorage.getItem("brobroli:mine") || "[]"), box = document.getElementById("mine");
-    if (!box || !list.length) return;
-    list.slice(-3).reverse().forEach(function (s) {
-      var d = document.createElement("div");
-      d.style.cssText = "background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;margin:0 0 14px";
-      var t = document.createElement("b"); t.textContent = "Ta boutique « " + s.name + " »";
-      var fixed = location.origin + "/s/" + s.slug;
-var a = document.createElement("a"); a.href = fixed; a.textContent = fixed;
-
-      a.style.cssText = "display:block;word-break:break-all;color:inherit;font-weight:600;margin:6px 0";
-      var b = document.createElement("button"); b.type = "button"; b.className = "add"; b.textContent = "Copier le lien";
-      b.onclick = function () {
-        (navigator.clipboard ? navigator.clipboard. :writeText(fixed) Promise.reject()).then(function () { b.textContent = "Lien copié"; }, function () { b.textContent = "Copie le lien ci-dessus"; });
-      };
-      d.appendChild(t); d.appendChild(a); d.appendChild(b); box.appendChild(d);
-    });
-  } catch (e) {}
-})();
-</script>
-
-</body>
-</html>
+      var h =
