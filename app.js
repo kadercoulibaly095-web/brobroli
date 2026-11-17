@@ -65,8 +65,12 @@ function newCode() {
 function rpc(name, body) {
   return fetch(CONFIG.SUPABASE_URL + "/rest/v1/rpc/" + name, { method: "POST", headers: headers(), body: JSON.stringify(body) })
     .then(function (r) {
-      if (r.ok) return r.json();
-      return r.json().then(function (e) { throw new Error((e && e.message) || "fail"); }, function () { throw new Error("fail"); });
+      return r.text().then(function (t) {
+        var d = null;
+        try { d = t ? JSON.parse(t) : null; } catch (e) {}
+        if (r.ok) return d;
+        throw new Error((d && d.message) || "fail");
+      });
     });
 }
 function setShopCode(slug, code) { return rpc("set_shop_code", { p_slug: slug, p_code: code }); }
