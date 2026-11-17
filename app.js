@@ -1,6 +1,6 @@
 // Colle ici les infos de ton projet Supabase (Settings > API).
 // Tant que c'est vide, le site fonctionne en mode test (données gardées sur cet appareil seulement).
-var CONFIG = { SUPABASE_URL: "//cnggjqttckhcopxwgeao.supabase.co", SUPABASE_KEY: "sb_publishable_s0hEOVXnltK4xCsq9_w_LQ_PtT8_x5y" };
+var CONFIG = { SUPABASE_URL: "https://cnggjqttckhcopxwgeao.supabase.co", SUPABASE_KEY: "sb_publishable_s0hEOVXnltK4xCsq9_w_LQ_PtT8_x5y" };
 var DEMO = !CONFIG.SUPABASE_URL;
 
 function esc(s) {
