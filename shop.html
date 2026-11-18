@@ -50,7 +50,9 @@
       (/^https:\/\//i.test(s.wave || "") ? '<a class="add" style="margin-top:10px" href="' + esc(s.wave) + '" target="_blank" rel="noopener">Payer avec Wave</a><p class="info">Après le paiement, envoie la capture sur WhatsApp.</p>' : '') +
       (/^\d{9,15}$/.test(s.phone || "") ? '<a class="add" style="margin-top:10px" href="tel:+' + esc(s.phone) + '">Appeler le vendeur</a>' : '') +
       '</aside></div>' +
-      (pro ? "" : '<p class="info" style="margin-top:28px">Boutique créée avec <a href="index.html">Brobroli</a></p>');
+      (pro ? "" : '<p class="info" style="margin-top:28px">Boutique créée avec <a href="index.html">Brobroli</a></p>') +
+      '<p class="info" style="margin-top:14px"><a href="/manage.html?s=' + esc(s.slug) + '">Tu es le vendeur ? Ajouter des articles</a></p>';
+
 
     var box = document.getElementById("items");
     items.forEach(function (it, i) {
